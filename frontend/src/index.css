@@ -1,0 +1,78 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #4338ca #0f0f23;
+  }
+  *::-webkit-scrollbar {
+    width: 6px;
+  }
+  *::-webkit-scrollbar-track {
+    background: #0f0f23;
+  }
+  *::-webkit-scrollbar-thumb {
+    background: #4338ca;
+    border-radius: 3px;
+  }
+  body {
+    @apply bg-campus-darker text-white;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-campus-card/80 backdrop-blur-xl border border-campus-border/50 rounded-2xl;
+  }
+  .glass-card-hover {
+    @apply glass-card transition-all duration-300 hover:border-primary-500/50 hover:shadow-lg hover:shadow-primary-500/10 hover:-translate-y-1;
+  }
+  .btn-primary {
+    @apply bg-gradient-to-r from-primary-600 to-primary-500 text-white px-6 py-3 rounded-xl font-semibold
+           transition-all duration-300 hover:from-primary-500 hover:to-primary-400 hover:shadow-lg hover:shadow-primary-500/30
+           active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn-secondary {
+    @apply bg-campus-card border border-campus-border text-white px-6 py-3 rounded-xl font-semibold
+           transition-all duration-300 hover:border-primary-500/50 hover:bg-campus-card/80
+           active:scale-95;
+  }
+  .btn-danger {
+    @apply bg-gradient-to-r from-red-600 to-red-500 text-white px-6 py-3 rounded-xl font-semibold
+           transition-all duration-300 hover:from-red-500 hover:to-red-400 hover:shadow-lg hover:shadow-red-500/30
+           active:scale-95;
+  }
+  .input-field {
+    @apply w-full bg-campus-dark border border-campus-border rounded-xl px-4 py-3 text-white
+           placeholder:text-campus-muted/60 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500/50
+           transition-all duration-200;
+  }
+  .badge {
+    @apply px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider;
+  }
+  .badge-tech { @apply bg-blue-500/20 text-blue-400; }
+  .badge-fest { @apply bg-purple-500/20 text-purple-400; }
+  .badge-music { @apply bg-pink-500/20 text-pink-400; }
+  .badge-sports { @apply bg-green-500/20 text-green-400; }
+  .badge-workshop { @apply bg-yellow-500/20 text-yellow-400; }
+  .badge-seminar { @apply bg-cyan-500/20 text-cyan-400; }
+  .badge-other { @apply bg-gray-500/20 text-gray-400; }
+  .section-heading {
+    @apply text-3xl md:text-4xl font-bold font-display;
+  }
+  .gradient-text {
+    @apply bg-gradient-to-r from-primary-400 via-accent-400 to-primary-400 bg-clip-text text-transparent;
+  }
+}
+
+@layer utilities {
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
+  }
+  .animate-slide-up {
+    animation: slideUp 0.5s ease-out forwards;
+  }
+}
