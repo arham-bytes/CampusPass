@@ -1,0 +1,181 @@
+# CampusPass — Implementation Plan
+
+A college event management and ticketing platform (Eventbrite-style for Indian colleges) with 3 user roles, Razorpay payments, and QR-code ticketing.
+
+## User Review Required
+
+> [!IMPORTANT]
+> **Razorpay Keys**: You'll need to provide Razorpay test-mode `key_id` and `key_secret` in `.env`. The app will work in test mode without real payments.
+
+> [!IMPORTANT]
+> **MongoDB**: You'll need a MongoDB Atlas connection string (or local MongoDB). The `.env.example` will document all required variables.
+
+> [!IMPORTANT]
+> **Cloudinary**: For image uploads, Cloudinary credentials are needed. Alternatively, the app will fall back to local file storage using `multer`.
+
+---
+
+## Architecture Overview
+
+```
+campuspass/
+├── backend/          # Express.js API server
+│   ├── config/       # DB connection, cloudinary config
+│   ├── controllers/  # Route handlers
+│   ├── middleware/    # Auth, error handling, validation
+│   ├── models/       # Mongoose schemas
+│   ├── routes/       # API routes
+│   ├── utils/        # Helpers (QR gen, email, etc.)
+│   └── server.js     # Entry point
+├── frontend/         # React + Vite
+│   ├── src/
+│   │   ├── api/      # API client (axios)
+│   │   ├── components/  # Reusable UI components
+│   │   ├── contexts/ # Auth context
+│   │   ├── pages/    # Route pages
+│   │   └── lib/      # Utilities
+│   └── ...
+└── README.md
+```
+
+---
+
+## Proposed Changes
+
+### Backend — Express.js + MongoDB
+
+#### [NEW] backend/package.json
+Express server with dependencies: `express`, `mongoose`, `bcryptjs`, `jsonwebtoken`, `cors`, `dotenv`, `multer`, `cloudinary`, `razorpay`, `qrcode`, `express-validator`, `nodemailer`.
+
+#### [NEW] backend/server.js
+Entry point — connects to MongoDB, mounts routes, starts server on port 5000.
+
+#### [NEW] backend/config/db.js
+MongoDB connection using Mongoose with `MONGO_URI` from env.
+
+#### [NEW] backend/config/cloudinary.js
+Cloudinary configuration for image uploads (optional, graceful fallback).
+
+#### [NEW] backend/models/User.js
+Schema: `name`, `email`, `password` (hashed), `role` (student/organizer/admin), `college`, `phone`, `referralCode`, `referredBy`, `createdAt`.
+
+#### [NEW] backend/models/Event.js
+Schema: `title`, `description`, `category` (Tech/Fest/Music/Sports), `college`, `date`, `venue`, `price`, `totalTickets`, `ticketsSold`, `image`, `organizer` (ref User), `status` (pending/approved/rejected), `featured`, `coupons[]`, `createdAt`.
+
+#### [NEW] backend/models/Booking.js
+Schema: `event` (ref), `user` (ref), `ticketId` (unique), `qrCode` (data URL), `status` (confirmed/cancelled/checked-in), `payment` (ref), `createdAt`.
+
+#### [NEW] backend/models/Payment.js
+Schema: `booking` (ref), `user` (ref), `razorpayOrderId`, `razorpayPaymentId`, `razorpaySignature`, `amount`, `status` (pending/success/failed), `createdAt`.
+
+#### [NEW] backend/middleware/auth.js
+JWT verification middleware + role-based access control (`protect`, `authorize(...roles)`).
+
+#### [NEW] backend/middleware/errorHandler.js
+Centralized error handling middleware.
+
+#### [NEW] backend/routes/auth.js & backend/controllers/authController.js
+- `POST /api/auth/register` — signup with role
+- `POST /api/auth/login` — login, return JWT
+- `GET /api/auth/me` — get current user
+
+#### [NEW] backend/routes/events.js & backend/controllers/eventController.js
+- `GET /api/events` — list (with filters: category, college, date, search)
+- `GET /api/events/:id` — single event
+- `POST /api/events` — create (organizer only)
+- `PUT /api/events/:id` — update (organizer/owner)
+- `DELETE /api/events/:id` — delete (organizer/owner or admin)
+
+#### [NEW] backend/routes/bookings.js & backend/controllers/bookingController.js
+- `POST /api/bookings` — book ticket (generates QR code, prevents duplicates)
+- `GET /api/bookings/my` — user's bookings
+- `GET /api/bookings/event/:eventId` — event's bookings (organizer)
+- `POST /api/bookings/verify/:ticketId` — verify/scan QR (organizer check-in)
+
+#### [NEW] backend/routes/payments.js & backend/controllers/paymentController.js
+- `POST /api/payments/create-order` — create Razorpay order
+- `POST /api/payments/verify` — verify payment signature & confirm booking
+
+#### [NEW] backend/routes/admin.js & backend/controllers/adminController.js
+- `GET /api/admin/dashboard` — stats overview
+- `GET /api/admin/events` — all events
+- `PUT /api/admin/events/:id/approve` — approve/reject
+- `PUT /api/admin/events/:id/feature` — toggle featured
+- `GET /api/admin/users` — all users
+- `GET /api/admin/transactions` — all transactions
+
+#### [NEW] backend/utils/generateQR.js
+QR code generation using `qrcode` package.
+
+#### [NEW] backend/utils/sendEmail.js
+Email notifications using `nodemailer` (booking confirmations).
+
+#### [NEW] backend/.env.example
+Template with all required env variables.
+
+---
+
+### Frontend — React + Vite + Tailwind + ShadCN
+
+#### [NEW] frontend/ (via `create-vite`)
+React project bootstrapped with Vite.
+
+#### [NEW] frontend/src/api/axios.js
+Axios instance with base URL and JWT interceptor.
+
+#### [NEW] frontend/src/contexts/AuthContext.jsx
+Auth context provider — login, logout, register, token storage.
+
+#### [NEW] frontend/src/components/Navbar.jsx
+Responsive navbar with role-based navigation, mobile menu.
+
+#### [NEW] frontend/src/components/Footer.jsx
+Startup-style footer with branding.
+
+#### [NEW] frontend/src/components/EventCard.jsx
+Modern event card with image, category badge, price, date.
+
+#### [NEW] frontend/src/components/ProtectedRoute.jsx
+Route guard for authenticated/role-specific routes.
+
+#### [NEW] frontend/src/pages/Home.jsx
+Startup-style landing page — hero section, featured events, categories, CTA.
+
+#### [NEW] frontend/src/pages/Login.jsx & Signup.jsx
+Auth forms with validation.
+
+#### [NEW] frontend/src/pages/Events.jsx
+Event listing with filters (category, college, date, search).
+
+#### [NEW] frontend/src/pages/EventDetails.jsx
+Full event details, booking button, Razorpay payment flow.
+
+#### [NEW] frontend/src/pages/StudentDashboard.jsx
+Booking history, downloadable QR tickets.
+
+#### [NEW] frontend/src/pages/OrganizerDashboard.jsx
+Create/manage events, view registrations, revenue analytics, QR scanner.
+
+#### [NEW] frontend/src/pages/AdminDashboard.jsx
+Overview stats, event approval, user management, transactions.
+
+---
+
+## Verification Plan
+
+### Automated Tests
+Since this is a greenfield MVP, formal test suites are not in scope, but the following manual verifications will be performed:
+
+### Browser-Based Verification
+1. **Start backend**: `cd backend && npm install && node server.js` — verify it starts on port 5000 without errors
+2. **Start frontend**: `cd frontend && npm install && npm run dev` — verify Vite dev server starts
+3. **Landing page**: Open `http://localhost:5173` — verify the landing page renders correctly with modern UI
+4. **Auth flow**: Test signup → login → protected routes
+5. **Event creation**: As organizer, create an event — verify it appears in listings
+6. **Booking flow**: As student, browse events → book → payment → QR ticket
+7. **Admin panel**: As admin, view dashboard, approve/reject events
+
+### Manual Verification (User)
+- Verify Razorpay test payment works with test credentials
+- Verify mobile responsiveness on phone/tablet
+- Verify QR code generation and display
