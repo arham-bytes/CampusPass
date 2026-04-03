@@ -48,7 +48,7 @@ export default function Wallet() {
                 key: data.key,
                 amount: data.order.amount,
                 currency: data.order.currency,
-                name: 'CampusPass',
+                name: 'eVEStro',
                 description: `Add ₹${amount} to Wallet`,
                 order_id: data.order.id,
                 handler: async (response) => {

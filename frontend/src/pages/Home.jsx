@@ -54,7 +54,7 @@ export default function Home() {
 
                         <h1 className="text-5xl md:text-7xl font-extrabold font-display leading-tight mb-6 animate-slide-up">
                             Your Campus Events,{' '}
-                            <span className="gradient-text">One Pass Away</span>
+                            <span className="gradient-text">One Click Away</span>
                         </h1>
 
                         <p className="text-lg md:text-xl text-campus-muted max-w-2xl mx-auto mb-10 animate-slide-up" style={{ animationDelay: '0.1s' }}>
