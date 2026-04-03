@@ -47,8 +47,13 @@ export default function Footer() {
                     <div>
                         <h4 className="text-sm font-semibold uppercase tracking-wider mb-4 text-white">Connect</h4>
                         <div className="flex gap-3 mb-4">
-                            {[Twitter, Instagram, Github, Mail].map((Icon, i) => (
-                                <a key={i} href="#" className="w-9 h-9 rounded-lg bg-campus-card border border-campus-border flex items-center justify-center
+                            {[
+                                { Icon: Twitter, href: '#' },
+                                { Icon: Instagram, href: 'https://www.instagram.com/_evestro?igsh=OTE50WNydTI3cW9w', target: '_blank' },
+                                { Icon: Github, href: '#' },
+                                { Icon: Mail, href: 'mailto:hello@evestro.in' }
+                            ].map(({ Icon, href, target }, i) => (
+                                <a key={i} href={href} target={target} rel={target === '_blank' ? "noopener noreferrer" : undefined} className="w-9 h-9 rounded-lg bg-campus-card border border-campus-border flex items-center justify-center
                                                text-campus-muted hover:text-primary-400 hover:border-primary-500/50 transition-all">
                                     <Icon className="w-4 h-4" />
                                 </a>
