@@ -13,7 +13,7 @@ export default function Footer() {
                                 <Ticket className="w-5 h-5 text-white" />
                             </div>
                             <span className="text-xl font-bold font-display">
-                                Campus<span className="gradient-text">Pass</span>
+                                eVE<span className="gradient-text">Stro</span>
                             </span>
                         </Link>
                         <p className="text-campus-muted text-sm leading-relaxed">
